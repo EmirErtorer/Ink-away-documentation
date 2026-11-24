@@ -1,63 +1,90 @@
 ---
 title: "Integration API"
-description: "Let your KOReader plugin work with Ink Away."
+description: "Let your KOReader plugin work with Ink Away: know when annotation mode opens, or let readers write on your own view."
 ---
 
-Ink Away has a small public API for other KOReader plugins. Your plugin can use it
-without touching Ink Away's code or patching it.
+Ink Away has a small public API for other KOReader plugins. With it, your plugin
+can work with Ink Away without touching its code or patching it at runtime.
 
 <Callout type="warn" title="Experimental">
-The API ships with Ink Away 4.4.3 and newer. It may change before Ink Away 5.0, so
-check the [version numbers](/docs/developers/api/integration-api-version) and do
-nothing if they aren't the ones you know.
+The API ships with Ink Away 4.4.3 and newer. It may change before Ink Away 5.0.
+Check the [version numbers](/docs/developers/api/integration-api-version) before
+using it, and leave your plugin working as usual if they aren't the ones you know.
 </Callout>
 
-## What you can do
+## What you can do with it
 
-- **Know when annotation mode opens and closes**, on KOReader's own page or on yours. See [Listen for annotation mode](/docs/developers/examples/event-only).
-- **Let readers annotate your own view.** If your plugin shows a book's pages its own way, Ink Away's annotation mode can open over it. See [Annotate your own viewer](/docs/developers/examples/rendering-consumer).
+There are two ways to use the API. Most plugins need only the first.
+
+- **Listen for annotation mode.** Know when the reader starts and stops annotating, for example to pause your own timers, hide an overlay or save your state. You use two events, `onAnnotationOpened` and `onAnnotationClosed`. See [Listen for annotation mode](/docs/developers/examples/event-only).
+- **Annotate your own viewer.** Let readers write on pages **your** plugin shows: zoomed panels, a custom layout, a two-page spread. You describe your screen with a surface and connect it with `installPluginIntegration`. See [Annotate your own viewer](/docs/developers/examples/rendering-consumer).
+
+You don't need to know anything about Ink Away's internals for either. Ink Away
+keeps its own tools, toolbar, saving and cloud sync; your plugin only answers a few
+questions about its own screen.
 
 ## Example: Panels+
 
-<video width="30%" controls height="auto" src="https://github.com/user-attachments/assets/fdf3ef83-c7df-48f4-bb30-ca32a2305b90"></video>
+<video controls playsInline preload="metadata" src="https://github.com/user-attachments/assets/fdf3ef83-c7df-48f4-bb30-ca32a2305b90"></video>
 
-[Panels+](https://github.com/KristanLaimon/PanelsPlus) reads comics panel by panel
-with its own renderer. To let readers draw on a panel, it:
+[Panels+](https://github.com/KristanLaimon/PanelsPlus) reads comics panel by panel:
+it shows one panel at a time, zoomed to fill the screen, with its own renderer. That
+is exactly the case KOReader's normal view can't handle. If Ink Away drew on the
+screen as usual, the ink would be saved where it lands on the **screen**, not on the
+**page**, and it would end up in the wrong place as soon as the reader left the
+panel.
 
-- tells Ink Away where the page is on its screen, so the ink lands on the right spot of the real page,
-- turns to its next or previous panel when the toolbar's arrows are pressed.
+The API fixes that. This is what happens in the video:
 
-## What the reader sees
+1. **The reader opens a comic in Panels+** and moves to a panel. Panels+ has already connected to Ink Away with `installPluginIntegration`, giving it a **surface**: a table that says which page is shown, and how a point on the screen maps to a point on that page.
+2. **The reader taps "Draw (Ink-away)"** on Panels+'s control rail. Panels+ calls `ink:onInkAwayAnnotate()`.
+3. **Ink Away opens annotation mode over the panel**, with its usual toolbar. It asks the surface for the panel's area on the screen (`clip`), so its drawing area covers the panel and not Panels+'s controls. A viewer can hide its own controls here, in the surface's optional `begin()`.
+4. **The reader writes on the panel.** Every stroke is turned into page coordinates through the surface's `toPage`. A panel zoomed to twice its size gives a stroke half the size on the page, in the same place.
+5. **The reader taps the toolbar's `>` arrow.** Ink Away saves what is in hand and calls the surface's `turn(1, done)`. Panels+ moves to the next panel, which may be on the next page, and calls `done(next_surface)` with the new panel's surface. Drawing waits until then.
+6. **The reader closes annotation mode.** The surface's optional `finish()` is where a viewer shows its controls again. From then on, Panels+ paints the saved ink on its panels with `ink:paintDocumentSurface(surface, bb)` in its own paint function.
+7. **The reader goes back to KOReader's normal page view.** The ink is there, at the right spot and size, because it was saved on the page, not on the screen. It also syncs and exports like any other ink.
 
-- Your viewer gets an "annotate" action, or the reader uses Ink Away's own gesture or menu. Annotation mode opens over your viewer, on the page it shows. Your controls and margins stay outside the drawing area.
-- Page turns in annotation mode ask your viewer to turn, and drawing waits until it has.
-- Closing annotation mode keeps the ink, and your viewer paints it from then on.
+Panels+ needs a build with Ink Away support. Its stable 1.6.0 release doesn't have it yet.
+
+## How it fits together
+
+Whichever way you use the API, connecting works the same way:
+
+1. **When a book opens**, Ink Away puts its API on the reader as `ui.inkAwayIntegrationAPI`, once it is ready.
+2. **Your plugin checks for it.** KOReader loads plugins in name order, so Ink Away may not be ready yet when your plugin starts. If the API is there, use it at once. If not, add your plugin to `ui.inkAwayPendingIntegrations` and Ink Away calls your plugin's `configureInkAway(ink)` as soon as it is ready. See [the ready instance](/docs/developers/api/ready-instance) and [the pending queue](/docs/developers/api/pending-integrations).
+3. **In `configureInkAway(ink)`**, check the version numbers, then subscribe to events or connect your viewer.
+4. **When your plugin or viewer closes**, call the functions you got back (the unsubscribes, or the `cleanup` from `installPluginIntegration`).
+5. **When the book closes**, Ink Away removes `ui.inkAwayIntegrationAPI`, and the old table refuses new connections.
 
 ## The API at a glance
 
-Once a book is open and Ink Away is ready, it puts its API on the reader as
-`ui.inkAwayIntegrationAPI`:
-
 | Member | What it does |
 | --- | --- |
-| `integration_api_version`, `document_surface_version` | Both `1` for now |
-| `ui` | The reader it belongs to |
-| [`installPluginIntegration(widget, surface, options)`](/docs/developers/api/install-plugin-integration) | Connect your viewer. Returns a `cleanup` function |
-| [`paintDocumentSurface(surface, bb)`](/docs/developers/api/paint-document-surface) | Paint the book's ink on your page |
+| `integration_api_version`, `document_surface_version` | Both `1` for now. Check them before anything else |
+| `ui` | The reader this API belongs to |
+| [`onAnnotationOpened(cb)`](/docs/developers/api/on-annotation-opened), [`onAnnotationClosed(cb)`](/docs/developers/api/on-annotation-closed) | Call `cb` when annotation mode opens or closes, on any page. Each returns an unsubscribe function |
+| [`installPluginIntegration(widget, surface, options)`](/docs/developers/api/install-plugin-integration) | Connect your viewer and its [surface](/docs/developers/api/surface). Returns a `cleanup` function |
+| [`paintDocumentSurface(surface, bb)`](/docs/developers/api/paint-document-surface) | Paint the book's saved ink on your page, in your own paint function |
 | [`releaseDocumentSurface(surface)`](/docs/developers/api/release-document-surface) | Close annotation mode on your surface, keeping the ink |
-| [`onAnnotationOpened(cb)`](/docs/developers/api/on-annotation-opened), [`onAnnotationClosed(cb)`](/docs/developers/api/on-annotation-closed) | Events. Each returns an unsubscribe function |
-| [`onInkAwayAnnotate()`](/docs/developers/api/annotate) | Open annotation mode |
+| [`onInkAwayAnnotate()`](/docs/developers/api/annotate) | Open annotation mode: on your viewer if it is connected and shown, otherwise on KOReader's page |
 
-## Rules Ink Away keeps
+## What Ink Away promises
 
-- **Nothing changes for anyone not using a viewer plugin.** KOReader's own page works exactly as before.
-- **Your failures stay yours.** Every call to your surface is guarded. A failure is logged and passed to your `on_error`, and annotation mode falls back to KOReader's page or closes, keeping the ink.
-- **Same ink format.** A book annotated on your view opens with its ink in KOReader's view, on another reader and in exports.
-- **Fixed-page books only.** A surface maps PDF, comic and DjVu pages, not reflowing books.
+- **Nothing changes for anyone not using your plugin.** KOReader's own page works exactly as before: same refreshes, pen, keys and exports.
+- **Your failures stay yours.** Every call into your surface is guarded. A failure is logged and passed to your `on_error`, and annotation mode falls back to KOReader's page, or closes, keeping the ink.
+- **One ink format.** Ink drawn on your view is stored per page, in page units, exactly like ink drawn in KOReader's view. A book annotated in your plugin opens with its ink in KOReader, on another reader and in exports.
+- **No copies of the screen.** Painting on your page draws only the ink, and only inside your clip.
+
+## Limits
+
+- **Fixed-page books only.** A surface maps PDF, comic (CBZ, CBR) and DjVu pages. Reflowing books such as EPUB can't be shown through a surface.
+- **KOReader's highlights** aren't drawn on your page, since KOReader's own view draws them. On your page, Ink Away's highlighter draws see-through ink instead.
+- **While your page animates** during a turn, annotation mode shows a picture of it and takes no input.
 
 ## Source
 
 The API's own description is [docs/INTEGRATION.md](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/INTEGRATION.md)
 in the Ink Away repository, with types for the Lua language server in
 [integration-types.lua](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/integration-types.lua).
-It was designed by [Kristan Laimon](https://github.com/KristanLaimon).
+The API was designed by [Kristan Laimon](https://github.com/KristanLaimon), the
+author of Panels+.

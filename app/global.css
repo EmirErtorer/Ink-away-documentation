@@ -42,3 +42,11 @@ html > body[data-scroll-locked] {
 .prose .grid img:not([src$='.svg']) {
   max-width: 100%;
 }
+.prose video {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin-inline: auto;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.5rem;
+}
