@@ -1,7 +1,7 @@
 <p><img src="public/assets/ink-away-title.svg" width="45%" alt="Ink Away"><br>
 <img src="public/assets/readme-divider.svg" width="100%" alt=""></p>
 
-The source of [Ink Away](https://github.com/EmirErtorer/ink-away.koplugin)'s documentation site: **https://ink-away-three.vercel.app**
+The source of [Ink Away](https://github.com/EmirErtorer/ink-away.koplugin)'s documentation site: **https://ink-away-docs.vercel.app**
 
 It is the user guide: installing, drawing, notebooks, writing on books, export and sync, reader notes and troubleshooting. Developers find the **integration API** there too, which lets another KOReader plugin work with Ink Away.
 
