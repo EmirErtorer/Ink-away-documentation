@@ -26,12 +26,12 @@ Throughout this example, we'll be using these three objects:
 -- Rendering consumer: handles both before-ready and after-ready registration.
 -- A plugin may also be an event-only consumer; the roles are independent.
 -- Your own viewer setup supplies ui, viewer_widget and a valid surface. Rendering and
--- surface geometry are deliberately omitted; see Plugin-integration.md.
+-- surface geometry are deliberately omitted; see the rendering-consumer guide.
 local YourPlugin = {}
 
 -- MOCK signature: your plugin creates its own viewer and surface.
 -- viewer_widget is that actual KOReader viewer object, not a standard plugin field.
-function YourPlugin:init(ui, viewer_widget, surface)
+function YourPlugin:connectInkAway(ui, viewer_widget, surface)
     self.ui, self.viewer_widget, self.surface = ui, viewer_widget, surface
     self.closed, self.annotation_open = false, false
     self.status = "Waiting for Ink Away"
@@ -136,7 +136,7 @@ Breaking down the previous example, step by step:
 ## 1. Describe what your viewer displays
 
 A **surface** is the table that tells Ink Away what your viewer is displaying.
-External surfaces support fixed-page documents, like PDFs and comic archives.
+Surfaces support fixed-page documents: PDFs, comic archives and DjVu, not EPUB.
 
 You need `version = 1`, `document = ui.document`, and these seven methods.
 They describe the **original book pages**, even when your viewer only shows a crop:
@@ -194,7 +194,7 @@ rotation in radians.
 
 Do not reject points just because they are outside `clip()`. Ink Away handles
 clipping separately. For more details, see
-[the full surface contract](/docs/api/register-rendering-view#surface-contract).
+[the full surface contract](/docs/api/surface).
 
 ## 2. Connect when your viewer is ready
 
@@ -283,8 +283,8 @@ Removing the queue entry cancels setup if Ink Away has not loaded yet. Calling
 `cleanup()` releases your surface's active editor, then removes the provider and
 listeners. Keep your viewer and surface usable until that function finishes.
 
-If your plugin replaces viewers when turning pages, see the handoff rules under
-[optional surface callbacks](/docs/api/register-rendering-view#optional-callbacks)
+If your plugin turns pages or replaces viewers while annotating, see
+[optional surface callbacks](/docs/api/surface#optional-callbacks)
 before adding that behavior.
 
 [Download the complete Lua mock](/examples/main-rendering-consumer.lua).

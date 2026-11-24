@@ -194,9 +194,9 @@ function HeroSection() {
             bg-fd-primary focus-visible:outline-2 focus-visible:outline-fd-ring focus-visible:outline-offset-4 font-medium px-5 py-3 rounded-xl text-fd-primary-foreground text-sm transition-colors
             hover:bg-fd-primary/90
           ">
-            Read more...<ArrowRight size={16} />
+            Integration guide<ArrowRight size={16} />
           </Link>
-          <Link href="/docs#public-api" className="
+          <Link href="https://github.com/EmirErtorer/ink-away.koplugin" className="
             inline-flex min-h-12 gap-2 items-center justify-center
             bg-fd-background border focus-visible:outline-2 focus-visible:outline-fd-ring focus-visible:outline-offset-4 font-medium px-5 py-3 rounded-xl text-sm transition-colors
             hover:bg-fd-accent

@@ -4,7 +4,7 @@
     "on-annotation-opened",
     "on-annotation-closed",
     "install-plugin-integration",
-    "register-rendering-view",
+    "surface",
     "paint-document-surface",
     "release-document-surface",
     "annotate",

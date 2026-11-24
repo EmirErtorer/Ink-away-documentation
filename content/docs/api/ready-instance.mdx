@@ -16,8 +16,14 @@ if ink then
 end
 ```
 
+It is a small table with only the public members: the two version numbers,
+`ui` (the reader it belongs to), and the methods listed under Public API.
+
 Ink Away sets and clears this field. Do not assign it yourself. There is no
 separate loaded boolean to maintain.
+
+When the book closes, the field becomes `nil` and the old table refuses new
+installations.
 
 When it is `nil` during reader setup, use
 [inkAwayPendingIntegrations](/docs/api/pending-integrations). When your reader is

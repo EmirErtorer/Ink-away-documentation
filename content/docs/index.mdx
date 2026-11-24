@@ -3,42 +3,43 @@ title: "Integrate your plugin with Ink Away"
 description: "Start here. You need Lua and a KOReader plugin; no Ink Away knowledge is assumed."
 ---
 
-Ink Away offers includes a public API that allows other plugins
-to connect to it, and extend its functionality, like mods. This way is easier integrate other
-plugins with Ink Away without messing its internals or having to "monkey-patch" it.
+Ink Away has a public API that other KOReader plugins can use to work with it,
+without touching its internals or monkey-patching it.
 
-# What you can do?
+<Callout type="warn" title="Experimental">
+The API ships with Ink Away 4.4.3 and newer. It may change before Ink Away 5.0, so
+check the [version numbers](/docs/api/integration-api-version) and do nothing if
+they are not the ones you know.
+</Callout>
 
-Your plugin can subscribe and be notified of all "Ink-Away" important events like:
-- Opening Annotator Book Layer
-- Closing ********************
-- Option to give him a custom view renderer.
-- & more
+## What you can do
 
-# Aha, like what I can do with this?
+- **Get told when annotation mode opens and closes**, on KOReader's own page or on yours. See the [event-only example](/docs/integration/event-only).
+- **Let readers annotate your own view.** If your plugin shows a book's pages its own way, Ink Away's annotation mode can open over your view, on the page it shows. See the [rendering example](/docs/integration/rendering-consumer).
 
-## Example #1: Panels+ Plugin
+## What the reader sees
+
+- Your viewer gets an "annotate" action, or the reader uses Ink Away's own gesture or menu. Annotation mode opens over your viewer, with Ink Away's toolbar. The drawing area is the page's part of the screen; your controls and margins stay out of it.
+- Page turns in annotation mode ask your viewer to turn (it may animate). On a right-to-left page (manga), the toolbar's left arrow goes forward.
+- Closing annotation mode keeps the ink, and your viewer paints it in its own view from then on.
+- The ink is stored exactly as if it had been drawn in KOReader's own view, so it shows there too, syncs, and exports like any other.
+
+## Example: Panels+
+
 <video width="30%" controls height="auto" src="https://github.com/user-attachments/assets/fdf3ef83-c7df-48f4-bb30-ca32a2305b90"></video>
-This plugin has its own view render and needs to know when the button `>` or `<` are pressed so it executes Panels+ next panel or previous
-panel behavior. This means that:
 
-- You need Ink-Away to notify you when those buttons are pressed.
-- You need to tell Ink-Away to use a custom document viewer render, instead of KOReader default one.
+[Panels+](https://github.com/KristanLaimon/PanelsPlus) reads comics panel by panel
+with its own renderer. To let readers draw on a panel, it needs to:
 
-So this Ink-away public API exposes events and methods to make that possible in first place.
+- tell Ink Away where the page is on its screen, so the ink lands on the right spot of the real page,
+- turn to its next or previous panel when the toolbar's `>` or `<` is pressed.
 
----
+The API was designed by [Kristan Laimon](https://github.com/KristanLaimon) for
+exactly that.
 
-# Useful nomenclature
-Troughout this section, we'll be using the following terms:
+## Good to know
 
-- **`ui`** is KOReader's reader UI for the open book. In your plugin, this is
-  normally `self.ui`.
-- **`ink`** is the ready Ink Away plugin instance. Use it to call the public methods.
-- **Consumer** means your plugin object, or the object that owns its integration.
-- **Viewer** is your actual KOReader widget that displays content. Only rendering
-  consumers need one.
-- **Surface** is a Lua table that tells Ink Away how your viewer's screen positions
-  map to the book's original page coordinates.
-
-
+- Nothing changes for anyone not using a viewer plugin: KOReader's own page works exactly as before.
+- Every call to your surface is guarded. A failure is logged and passed to your `on_error`, and annotation mode falls back to KOReader's page or closes, keeping the ink.
+- Only fixed-page books (PDF, comics, DjVu) can be shown through a surface.
+- The source of truth is [docs/INTEGRATION.md](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/INTEGRATION.md) in the Ink Away repository, with Lua language server types in [integration-types.lua](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/integration-types.lua).

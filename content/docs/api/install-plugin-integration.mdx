@@ -3,8 +3,8 @@ title: "installPluginIntegration"
 description: "Connect a viewer and surface, with optional events, in one call."
 ---
 
-Start here for a rendering consumer. This registers a surface provider and
-optional callbacks for that exact surface.
+The one way to connect a viewer. It connects your widget's surface, with optional
+callbacks for that exact surface.
 
 ```lua
 local cleanup = ink:installPluginIntegration(viewer_widget, surface, {
@@ -22,7 +22,7 @@ cleanup()
 | Name | Type | Meaning |
 | --- | --- | --- |
 | `widget` | table | Your actual KOReader viewer widget. |
-| `surface` | table | A [valid surface](/docs/api/register-rendering-view#surface-contract) for the exact current document object. |
+| `surface` | table | A [valid surface](/docs/api/surface) for the exact current document object. |
 | `options` | table, optional | `on_open(event)`, `on_close(event)`, and `on_error(err)` callbacks. Any may be omitted. |
 
 Open/close payloads contain `document` and `surface`. These callbacks only match
@@ -44,8 +44,8 @@ the landing viewer owns final release.
 - The same widget and exact surface return the original cleanup. New callbacks do not replace the first ones.
 - A different surface on an already-registered widget raises an assertion. Clean up the old installation first.
 - Invalid surfaces, wrong-document objects, invalid options, and setup on a closed reader raise assertions immediately.
-- Do not also call `registerRenderingView()` for the same widget: they share one provider slot.
-- Registration does not show a viewer or open the editor. The viewer must be on the window stack when annotation opens.
+- Registration does not show a viewer or open the editor. When annotation opens, Ink Away takes the topmost connected widget on KOReader's window stack. Anything else covering the whole screen above it hides it.
+- After the book closes, the old API table refuses new installations.
 - A handoff to another surface does not give this installation the final close event. Use independent listeners if you need every closure.
 
 See the [rendering example](/docs/integration/rendering-consumer) for the full lifecycle.

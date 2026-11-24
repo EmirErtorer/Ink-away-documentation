@@ -7,8 +7,8 @@ description: "React to annotation opening and closing. No viewer or surface is n
 call `self:connectInkAway(self.ui)` from your own reader setup, and `self:dispose()` from
 your teardown. They are not KOReader lifecycle signatures.
 
-"connectInkAway(ink)": Its a mandatory prop your plugin must implement, Ink-away will
-call it when it loads in memory, it will install/configure your integration with ink-away
+`configureInkAway(ink)` is the one method your plugin must have. Ink Away calls it
+with its API once it is ready, and that is where you subscribe.
 
 ## Example:
 ```lua
@@ -19,7 +19,7 @@ call it when it loads in memory, it will install/configure your integration with
 local YourPlugin = {}
 
 -- MOCK signature: ui is this reader's UI. There are no viewer arguments.
-function YourPlugin:init(ui)
+function YourPlugin:connectInkAway(ui)
     self.ui = ui
     self.closed, self.annotation_open = false, false
     self.status = "Waiting for Ink Away"
@@ -94,7 +94,7 @@ end
 return YourPlugin
 ```
 
-Desglosing the previous example, would be:
+Step by step:
 
 ## 1. Connect when your reader opens
 

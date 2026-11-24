@@ -4,7 +4,7 @@ description: "Open annotation using Ink Away\u2019s existing action."
 ---
 
 Call this from your own annotation button or menu action after connecting.
-Ink Away selects the visible registered viewer; otherwise it uses the native reader.
+Ink Away opens on the topmost connected viewer that is shown; otherwise on KOReader's own page.
 
 ```lua
 if self.ink and self.ui.inkAwayIntegrationAPI == self.ink then
@@ -27,4 +27,3 @@ callback when you need confirmation.
 - No open book means no editor, even though the return value is `true`.
 - Requesting an already-shown editor does not open a second one.
 - Read-only annotation data or initialization failures can prevent opening.
-- Rendering factories are evaluated when a new session opens, not when registered.
