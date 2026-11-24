@@ -30,3 +30,15 @@ html > body[data-scroll-locked] {
   --color-fd-card: hsl(140, 18%, 9%);
   --color-fd-popover: hsl(140, 18%, 8%);
 }
+
+/* Reader screenshots are tall: keep them a readable size, centred, framed. */
+.prose img:not([src$='.svg']) {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin-inline: auto;
+  border: 1px solid var(--color-fd-border);
+}
+.prose .grid img:not([src$='.svg']) {
+  max-width: 100%;
+}

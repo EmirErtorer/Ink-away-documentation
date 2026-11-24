@@ -1,0 +1,34 @@
+---
+title: "releaseDocumentSurface"
+description: "Close annotation on your surface before destroying its resources."
+---
+
+Most viewers never call this: the `cleanup()` returned by
+[installPluginIntegration](/docs/developers/api/install-plugin-integration) already releases
+the surface. Call it yourself when the surface goes away on its own, for example
+after you used `cleanup(false)` to hand the session to another viewer.
+
+```lua
+ink:releaseDocumentSurface(surface)
+-- Remove your own event subscriptions, then destroy the viewer.
+```
+
+## Arguments
+
+| Name | Type | Meaning |
+| --- | --- | --- |
+| `surface` | surface table | The exact surface object you own. Never pass `nil`. |
+
+## Returns
+
+No value (`nil`). Closure does not acknowledge a successful disk save.
+
+## Things to know
+
+- Only the exact currently active surface matches. Another table with equal fields does not close it.
+- It uses the normal save/close path, also closes book notes if open, and clears that surface selection.
+- It does not remove your installation or listeners. Release first, while close listeners are still connected.
+- During a navigation handoff, keep the landing surface alive. Do not release the session being transferred; the final viewer releases it on closure.
+- A surface's `finish()` must tolerate its viewer already being closed.
+
+Event-only consumers do not need this method.

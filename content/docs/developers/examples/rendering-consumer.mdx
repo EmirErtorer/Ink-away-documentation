@@ -1,0 +1,176 @@
+---
+title: "Annotate your own viewer"
+description: "Let readers draw on the pages your plugin shows, with Ink Away's tools."
+---
+
+Use this when your plugin shows a book's pages its own way, as Panels+ does with
+comic panels, and you want readers to annotate what it shows.
+
+- Your viewer keeps drawing the page.
+- You tell Ink Away where the book's page is on your screen.
+- Ink Away handles the tools, saving and syncing. The ink is stored as if it had been drawn in KOReader's own view, so it shows there too.
+
+You'll work with three things:
+
+| Name | What it is |
+| --- | --- |
+| `ui` | The reader UI, normally your plugin's `self.ui`. |
+| `viewer_widget` | Your own widget that shows the page. |
+| `surface` | A table you write that maps your screen to the book's pages. |
+
+
+## 1. Describe what your viewer displays
+
+A **surface** is the table that tells Ink Away what your viewer is displaying.
+Surfaces support fixed-page documents: PDFs, comic archives and DjVu, not EPUB.
+
+You need `version = 1`, `document = ui.document`, and these seven methods.
+They describe the **original book pages**, even when your viewer only shows a crop:
+
+| Method | What you provide |
+| --- | --- |
+| `pages()` | Visible native page numbers, such as `{7}`. |
+| `key()` | A string that changes when the page, crop, zoom, pan, or rotation changes. |
+| `toPage(x, y)` | Screen point → `page, px, py, zoom, angle`, or `nil`. |
+| `toScreen(page, px, py)` | Page point → `x, y, zoom, angle`, or `nil`. |
+| `snapshot(bb)` | Paint the background into the supplied screen-sized buffer, without Ink Away ink. |
+| `repaint()` | Request a repaint of your viewer. |
+| `clip()` | Content rectangle `{x, y, w, h}` in absolute screen pixels. |
+
+For example, this surface describes one page with a uniform scale and no rotation.
+`layout` contains the page number, screen position, content width/height, and positive
+zoom. Keep it updated when your viewer changes.
+
+`paintBackground(bb)` is your viewer's own rendering function, without the ink overlay.
+Replace that call with the function your viewer actually uses.
+
+```lua
+local UIManager = require("ui/uimanager")
+local layout = {page = 7, x = 40, y = 80, w = 520, h = 640, zoom = 1}
+local surface = {version = 1, document = ui.document}
+
+function surface:pages() return {layout.page} end
+function surface:key()
+    return table.concat({layout.page, layout.x, layout.y,
+        layout.w, layout.h, layout.zoom}, ":")
+end
+function surface:toPage(x, y)
+    return layout.page, (x - layout.x) / layout.zoom,
+        (y - layout.y) / layout.zoom, layout.zoom, 0
+end
+function surface:toScreen(page, px, py)
+    if page ~= layout.page then return nil end
+    return layout.x + px * layout.zoom,
+        layout.y + py * layout.zoom, layout.zoom, 0
+end
+function surface:snapshot(bb)
+    viewer_widget:paintBackground(bb) -- your renderer, without the ink overlay
+end
+function surface:repaint()
+    UIManager:setDirty(viewer_widget, "ui")
+end
+function surface:clip()
+    return {x = layout.x, y = layout.y, w = layout.w, h = layout.h}
+end
+```
+
+`toPage()` and `toScreen()` need to agree: one maps screen positions to book page
+coordinates, and the other maps them back. `zoom` is positive, and `angle` is clockwise
+rotation in radians.
+
+Do not reject points just because they are outside `clip()`. Ink Away handles
+clipping separately. For more details, see
+[the full surface contract](/docs/developers/api/surface).
+
+## 2. Connect when your viewer is ready
+
+Call `self:connectInkAway(self.ui, viewer_widget, surface)` from your own viewer
+setup, after creating the surface:
+
+```lua
+function YourPlugin:connectInkAway(ui, viewer_widget, surface)
+    self.ui, self.viewer_widget, self.surface = ui, viewer_widget, surface
+    self.closed = false
+    if ui.inkAwayIntegrationAPI then
+        self:configureInkAway(ui.inkAwayIntegrationAPI)
+    else
+        ui.inkAwayPendingIntegrations = ui.inkAwayPendingIntegrations or {}
+        ui.inkAwayPendingIntegrations[self] = true
+    end
+end
+```
+
+`connectInkAway` is a helper name used in this example. Call it from your own viewer
+setup; it is not a KOReader lifecycle signature.
+
+If Ink Away is already ready, your plugin configures the integration immediately.
+If it loads later, it removes your queue entry and calls `configureInkAway(ink)`.
+You do not need to control plugin loading order. Your viewer must be on KOReader's
+window stack when annotation opens.
+
+## 3. Register your surface
+
+```lua
+function YourPlugin:configureInkAway(ink)
+    if self.closed or self.cleanup then return end
+    if ink.integration_api_version ~= 1
+            or ink.document_surface_version ~= 1 then return end
+
+    self.cleanup = ink:installPluginIntegration(self.viewer_widget, self.surface, {
+        on_open = function() self.annotation_open = true end,
+        on_close = function() self.annotation_open = false end,
+        on_error = function(err) self.last_error = tostring(err) end,
+    })
+    self.ink = ink
+end
+```
+
+`installPluginIntegration()` installs your rendering provider and the callbacks for
+this surface in one call. Keep the returned `cleanup` function: you'll call it when
+your viewer closes.
+
+These callbacks belong to your surface. If you also want notifications for all
+annotation sessions on this reader, use the subscriptions from the
+[event-only example](/docs/developers/examples/event-only).
+
+## 4. Paint the ink and open annotation mode
+
+Your viewer still renders its own content. After painting that background in your
+paint handler, tell Ink Away to draw the saved annotations on top:
+
+```lua
+if self.ink and self.ui.inkAwayIntegrationAPI == self.ink then
+    self.ink:paintDocumentSurface(self.surface, bb)
+end
+```
+
+To open annotation from your own button or menu, call `self.ink:onInkAwayAnnotate()`
+when the same ready-instance check succeeds. This requests opening the editor;
+`on_open` tells you when it actually opened.
+
+`surface:snapshot(bb)` must only paint your background. Do not call the combined
+background-and-ink paint handler from it, or the snapshot can recursively include
+saved ink.
+
+## 5. Disconnect before destroying the viewer
+
+```lua
+function YourPlugin:onCloseWidget()
+    if self.closed then return end
+    self.closed = true
+    local pending = self.ui.inkAwayPendingIntegrations
+    if pending then pending[self] = nil end
+    if self.cleanup then self.cleanup() end
+    self.cleanup, self.ink = nil, nil
+end
+```
+
+Removing the queue entry cancels setup if Ink Away has not loaded yet. Calling
+`cleanup()` releases your surface's active editor, then removes the provider and
+listeners. Keep your viewer and surface usable until that function finishes.
+
+If your plugin turns pages or replaces viewers while annotating, see
+[optional surface callbacks](/docs/developers/api/surface#optional-callbacks)
+before adding that behavior.
+
+[Download the whole example as one Lua file](/examples/main-rendering-consumer.lua).

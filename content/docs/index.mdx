@@ -1,45 +1,35 @@
 ---
-title: "Integrate your plugin with Ink Away"
-description: "Start here. You need Lua and a KOReader plugin; no Ink Away knowledge is assumed."
+title: "Overview"
+description: "A drawing, notes and book annotation app for KOReader, built for e-ink."
 ---
 
-Ink Away has a public API that other KOReader plugins can use to work with it,
-without touching its internals or monkey-patching it.
+Ink Away is a KOReader plugin. It turns your e-reader into a sketchbook, a notebook
+and a pen for your books, with **palm rejection** and **pen pressure** for stylus
+users. It works with a finger too.
 
-<Callout type="warn" title="Experimental">
-The API ships with Ink Away 4.4.3 and newer. It may change before Ink Away 5.0, so
-check the [version numbers](/docs/api/integration-api-version) and do nothing if
-they are not the ones you know.
-</Callout>
+![Writing on a book with Ink Away](/screenshots/book-annotate.gif)
 
-## What you can do
+## What it does
 
-- **Get told when annotation mode opens and closes**, on KOReader's own page or on yours. See the [event-only example](/docs/integration/event-only).
-- **Let readers annotate your own view.** If your plugin shows a book's pages its own way, Ink Away's annotation mode can open over your view, on the page it shows. See the [rendering example](/docs/integration/rendering-consumer).
+- **Draw** with pens of every kind, watercolor and smudge, on up to five layers.
+- **Take notes** in notebooks of lined, grid, dotted or planner pages, and turn handwriting into text.
+- **Write on any book** KOReader opens, from EPUB to PDF. On a reflowing book the ink follows its words when you change the font.
+- **Take it with you.** Export as PDF or PNG, send files to your phone over Wi-Fi, or sync with Dropbox or Google Drive.
 
-## What the reader sees
+## Where to start
 
-- Your viewer gets an "annotate" action, or the reader uses Ink Away's own gesture or menu. Annotation mode opens over your viewer, with Ink Away's toolbar. The drawing area is the page's part of the screen; your controls and margins stay out of it.
-- Page turns in annotation mode ask your viewer to turn (it may animate). On a right-to-left page (manga), the toolbar's left arrow goes forward.
-- Closing annotation mode keeps the ink, and your viewer paints it in its own view from then on.
-- The ink is stored exactly as if it had been drawn in KOReader's own view, so it shows there too, syncs, and exports like any other.
+<Cards>
+  <Card title="Install" href="/docs/start/install">Put Ink Away on your reader in a few minutes.</Card>
+  <Card title="First steps" href="/docs/start/first-steps">Your first drawing, notebook and book annotation.</Card>
+  <Card title="Gestures" href="/docs/start/gestures">Every swipe and tap Ink Away understands.</Card>
+  <Card title="Something wrong?" href="/docs/devices/troubleshooting">Fixes for common problems, and how to report a bug.</Card>
+</Cards>
 
-## Example: Panels+
+## Works on
 
-<video width="30%" controls height="auto" src="https://github.com/user-attachments/assets/fdf3ef83-c7df-48f4-bb30-ca32a2305b90"></video>
+Kindle, Kobo, Boox and other Android readers, reMarkable, and the other readers
+KOReader runs on. Colour screens get colour ink. Palm rejection needs KOReader
+2026.07 or newer.
 
-[Panels+](https://github.com/KristanLaimon/PanelsPlus) reads comics panel by panel
-with its own renderer. To let readers draw on a panel, it needs to:
-
-- tell Ink Away where the page is on its screen, so the ink lands on the right spot of the real page,
-- turn to its next or previous panel when the toolbar's `>` or `<` is pressed.
-
-The API was designed by [Kristan Laimon](https://github.com/KristanLaimon) for
-exactly that.
-
-## Good to know
-
-- Nothing changes for anyone not using a viewer plugin: KOReader's own page works exactly as before.
-- Every call to your surface is guarded. A failure is logged and passed to your `on_error`, and annotation mode falls back to KOReader's page or closes, keeping the ink.
-- Only fixed-page books (PDF, comics, DjVu) can be shown through a surface.
-- The source of truth is [docs/INTEGRATION.md](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/INTEGRATION.md) in the Ink Away repository, with Lua language server types in [integration-types.lua](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/integration-types.lua).
+Ink Away is free and open source, under the MIT license. The code, releases and
+issue tracker are on [GitHub](https://github.com/EmirErtorer/ink-away.koplugin).

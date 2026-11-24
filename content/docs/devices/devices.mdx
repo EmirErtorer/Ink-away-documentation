@@ -1,0 +1,39 @@
+---
+title: "Reader notes"
+description: "What to know on a Kindle, Kobo, Boox or other Android reader."
+---
+
+## Kindle
+
+- On a **Kindle Scribe**, palm rejection is on by default and pen pressure is available as a beta in **Pen and input**.
+- Ink Away is designed and tested on a Kindle Paperwhite, so finger drawing works well on Kindles without a pen.
+
+## Kobo
+
+- Kobo readers with a stylus (Libra Colour, Elipsa and others) get pen pressure as a beta, and colour ink on colour screens.
+- Kobo's own library lists every picture it finds on the reader. Up to 4.5.2, pictures you put on a book could show up there as books after a USB connection. The next version keeps them under a name Kobo skips, and renames old ones when the book is opened.
+
+## Boox and other Android readers
+
+- On a Boox with Onyx's pen layer, **the Boox firmware draws the ink while the pen moves**, as Boox's own notes app does, and Ink Away puts the real stroke (colour, texture, pressure) in place when the pen lifts. If anything goes wrong it turns itself off. You can also turn it off in **Pen and input**, **Draw with Boox's pen layer**.
+- On Android, drawing only sends the part of the screen that changed, which keeps it fast.
+
+## Other pen plugins
+
+Use Ink Away and other pen plugins (pencil.koplugin, for one) one at a time. They
+share KOReader's one pen hook, and Ink Away hands it back when it closes.
+
+Some older pen plugins replace one of KOReader's own files
+(`frontend/device/input.lua`), and turning the plugin off doesn't put it back. The
+pen can then act oddly in Ink Away, which warns you about it. To fix it, do one of
+these:
+
+- update KOReader to 2026.07 or newer,
+- reinstall KOReader,
+- or download the zip of the KOReader version you have, and copy its `koreader/frontend/device/input.lua` over the one on the reader.
+
+## Two-page and paper plugins
+
+Ink Away works with the MuPDFtwoPages and Paper Dots plugins. It also has its own
+[two pages side by side](/docs/books/clips-and-pages#two-pages-side-by-side) for
+fixed-page books.

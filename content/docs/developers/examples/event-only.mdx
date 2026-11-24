@@ -1,0 +1,81 @@
+---
+title: "Listen for annotation mode"
+description: "Know when annotation mode opens and closes. No viewer needed."
+---
+
+Use this when your plugin only needs to know when Ink Away's annotation mode opens
+and closes, for example to pause its own work while the reader writes.
+
+Your plugin needs one method, `configureInkAway(ink)`. Ink Away calls it with its
+API once it is ready, and that is where you subscribe. The other names on this page
+(`connectInkAway`, `dispose`) are only this example's: call them from your own
+setup and teardown.
+
+
+## 1. Connect when your reader opens
+
+```lua
+function YourPlugin:connectInkAway(ui)
+    self.ui = ui
+    self.closed = false
+    if ui.inkAwayIntegrationAPI then
+        self:configureInkAway(ui.inkAwayIntegrationAPI)
+    else
+        ui.inkAwayPendingIntegrations = ui.inkAwayPendingIntegrations or {}
+        ui.inkAwayPendingIntegrations[self] = true
+    end
+end
+```
+
+If Ink Away is already ready, configuration happens immediately. If it loads
+later, it removes your queue entry and calls your method. You do not need to
+look up `ui["ink-away"]` or control plugin loading order.
+
+## 2. Subscribe in configureInkAway
+
+```lua
+function YourPlugin:configureInkAway(ink)
+    if self.closed or self.stop_open then return end
+    if ink.integration_api_version ~= 1 then return end
+
+    self.stop_open = ink:onAnnotationOpened(function(event)
+        self.annotation_open = true
+        self.annotation_document = event.document
+        -- Pause your plugin's work here.
+    end)
+    self.stop_close = ink:onAnnotationClosed(function()
+        self.annotation_open = false
+        self.annotation_document = nil
+        -- Resume your plugin's work here.
+    end)
+end
+```
+
+Keep the two returned functions: calling them unsubscribes your listeners.
+`event.document` identifies the book. `event.surface` is `nil` for the normal
+reader, or a surface table for a custom viewer. Events describe future openings
+and closings; subscribing does not replay a session already in progress.
+
+## 3. Disconnect when your plugin closes
+
+```lua
+function YourPlugin:dispose()
+    if self.closed then return end
+    self.closed = true
+    local pending = self.ui.inkAwayPendingIntegrations
+    if pending then pending[self] = nil end
+    if self.stop_open then self.stop_open() end
+    if self.stop_close then self.stop_close() end
+    self.stop_open, self.stop_close = nil, nil
+end
+```
+
+Removing the queue entry cancels a connection that has not happened yet.
+Unsubscribing stops an existing connection. An event-only consumer does not
+close an editor or release another plugin's surface.
+
+[Download the whole example as one Lua file](/examples/main-event-only.lua).
+
+For details, see [onAnnotationOpened](/docs/developers/api/on-annotation-opened),
+[onAnnotationClosed](/docs/developers/api/on-annotation-closed), and
+[the pending queue](/docs/developers/api/pending-integrations).

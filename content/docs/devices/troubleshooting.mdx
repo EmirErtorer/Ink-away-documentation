@@ -1,0 +1,51 @@
+---
+title: "Troubleshooting"
+description: "Common problems, and how to report a bug."
+---
+
+## The right edge swipe doesn't open Ink Away
+
+Your reader may already use the right edge, for its light for example. Try the
+two-finger swipe from the bottom right corner toward the top left, or open Ink Away
+from the top menu, **Tools** tab. See [Gestures](/docs/start/gestures) to set your
+own.
+
+## Ink Away isn't in the Tools menu
+
+- Check the folder is called exactly `ink-away.koplugin`, and sits directly in `plugins` (not inside another folder from the zip).
+- Restart KOReader after copying it.
+
+## My palm draws on the page
+
+- Palm rejection needs KOReader 2026.07 or newer.
+- Set **Finger on the page** to **Nothing** in the pen settings, so a finger never draws.
+- If another pen plugin is or was installed, see [Other pen plugins](/docs/devices/devices#other-pen-plugins).
+
+## Ghosting or grey leftovers on the screen
+
+Do a long two-finger swipe down for a full refresh, or turn on the clean-up refresh
+every few strokes in Settings.
+
+## Something is hard to find
+
+The **Guide** in Settings has a short card for each topic, each with **Show me**.
+
+## Report a bug
+
+Open an [issue on GitHub](https://github.com/EmirErtorer/ink-away.koplugin/issues/new/choose).
+These help the most:
+
+1. **Your reader, KOReader version and Ink Away version** (Ink Away's is in Settings, Updates).
+2. **The steps** that make it happen, one by one.
+3. **The crash log**, if KOReader closed. Right after it happens, connect the reader to a computer and copy `crash.log`:
+
+   | Reader | Where |
+   | --- | --- |
+   | Kindle | `koreader/crash.log` |
+   | Kobo | `.adds/koreader/crash.log` |
+   | Android | `koreader/crash.log` in the app's storage |
+
+4. **A photo or short video** of the screen.
+
+For pen and touch problems, Settings has **Test pen and touch**, which shows how
+your pen, its buttons and your hand arrive. A photo of it helps a lot.

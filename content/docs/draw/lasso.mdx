@@ -1,0 +1,48 @@
+---
+title: "Lasso and convert to text"
+description: "Select anything to move or change it, and turn handwriting into text."
+---
+
+![A lasso selection](/screenshots/lasso-selection.png)
+
+## Select
+
+Pick **Lasso** and draw a loop around writing, shapes, pictures or text. Then you can:
+
+- move, resize, turn or flip it,
+- change its colour, opacity or size,
+- duplicate or delete it,
+- cut, copy and paste it to any page of any notebook or drawing,
+- make it a link to another page (see [Notebooks](/docs/notebooks/notebooks#links-and-contents)).
+
+With **Pan** on, a single touch picks a shape or picture without the lasso.
+
+## Convert to text
+
+1. Lasso some handwriting.
+2. Choose **Convert to text**.
+3. Check what was read and fix any mistakes.
+4. Tap **Convert** to turn it into a text box, or **Cancel** to keep the writing.
+
+The reading happens on the reader itself, with no internet. It knows English
+letters and digits. If you change your mind, one undo brings the writing back.
+
+## Convert to text online (experimental)
+
+For handwriting the reader can't read well, you can use an online service of your
+own instead.
+
+1. Tap the **Text** tool twice to open its settings.
+2. Turn on **Convert to text online**.
+3. Fill in **Address**, **Key** and **Model**.
+
+The service has to accept pictures through the OpenAI-style Chat Completions API.
+For example, the address `https://your-provider.example/v1` with the model
+`paddleocr-vl`.
+
+Good to know:
+
+- Only the writing you selected is sent, as a black-on-white picture. The page, pictures and other writing are not.
+- The key is never shown, but it is stored unencrypted in KOReader's settings (not in notebooks or exports).
+- Only HTTPS addresses with a valid certificate work. A request can take up to 90 seconds.
+- If the service fails, your writing stays as it was.

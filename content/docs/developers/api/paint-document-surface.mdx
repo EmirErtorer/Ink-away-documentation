@@ -1,0 +1,34 @@
+---
+title: "paintDocumentSurface"
+description: "Draw saved annotations over your viewer background."
+---
+
+Call this after your viewer paints its content in the reading paint handler.
+It paints into the supplied buffer; it does not open an annotation editor.
+
+```lua
+paintBackgroundWithoutInk(bb) -- your viewer's own renderer
+ink:paintDocumentSurface(surface, bb)
+```
+
+## Arguments
+
+| Name | Type | Meaning |
+| --- | --- | --- |
+| `surface` | valid surface table | Describes the current document and geometry. |
+| `bb` | KOReader blitbuffer | Screen-sized destination using absolute screen coordinates. |
+
+## Returns
+
+No value (`nil`). The buffer is painted in place and is not freed by Ink Away.
+
+## Things to know
+
+- Nothing is drawn if there is no book, no saved ink, a different document, or reading ink is disabled in settings.
+- Ink is clipped to the surface's content rectangle, or its optional `regions()`. Empty/missing clips draw no ink.
+- It does not replace the selected surface of an active annotation session.
+- Never call it from `surface:snapshot()`: that method paints only the background. This avoids a recursive ink overlay.
+- Caught painting errors are logged/reported without a success result. Some pixels may already be painted. Supply valid objects; `nil` is not a supported surface.
+
+The [rendering example](/docs/developers/examples/rendering-consumer) shows where this
+fits in setup, painting, and teardown.

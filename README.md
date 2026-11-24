@@ -3,12 +3,7 @@
 
 The source of [Ink Away](https://github.com/EmirErtorer/ink-away.koplugin)'s documentation site: **https://ink-away-three.vercel.app**
 
-For now it covers the **integration API**, which lets another KOReader plugin work with Ink Away:
-
-* **Get told** when annotation mode opens and closes.
-* **Let readers annotate your own view.** A plugin that shows a book's pages its own way, such as [Panels+](https://github.com/KristanLaimon/PanelsPlus), can have Ink Away's annotation mode open over it, with the ink kept as on the book's own pages.
-
-The API ships with Ink Away 4.4.3 and newer, and is experimental until 5.0.
+It is the user guide: installing, drawing, notebooks, writing on books, export and sync, reader notes and troubleshooting. Developers find the **integration API** there too, which lets another KOReader plugin work with Ink Away.
 
 ## Run it
 
@@ -20,16 +15,17 @@ You need [Bun](https://bun.sh). In this folder:
 
 ## Where things are
 
-- `content/docs/`: the pages, one `.mdx` file each. `meta.json` in each folder sets the order in the sidebar.
-- `public/examples/`: the Lua examples the pages offer as downloads.
+- `content/docs/`: the pages, one `.mdx` file each, in a folder per section (`start`, `draw`, `notebooks`, `books`, `share`, `devices`, `developers`). `meta.json` in each folder sets the order in the sidebar.
+- `public/screenshots/`: screenshots and GIFs, copied from the Ink Away repository's `assets/screenshots`.
+- `public/examples/`: the Lua examples the developer pages offer as downloads.
 - `app/(home)/page.tsx`: the home page.
 
 ## Writing the pages
 
-The source of truth is [docs/INTEGRATION.md](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/INTEGRATION.md) in the Ink Away repository. When the API changes there, change these pages too.
-
-Write for someone who knows Lua and has a KOReader plugin, but has never used Ink Away. Say what a name means before using it, show a small working step, then link to the details. Leave Ink Away's internals and history out.
+- **Write for someone who just installed Ink Away.** Short sentences, numbered steps, the exact names of buttons and settings in bold, as they read on the reader.
+- **Keep it true to the current release.** Feature facts come from the Ink Away repository's `docs/FEATURES.md` and `CHANGELOG.md`; the developer pages follow its [docs/INTEGRATION.md](https://github.com/EmirErtorer/ink-away.koplugin/blob/main/docs/INTEGRATION.md). When those change, change these pages too.
+- **Developer pages** are for someone who knows Lua and has a KOReader plugin, but has never used Ink Away. Say what a name means before using it, show a small working step, then link to the details.
 
 ## Credits
 
-The integration API and the first version of this site were made by [Kristan Laimon](https://github.com/KristanLaimon).
+The integration API and the first version of this site, its look and animations included, were made by [Kristan Laimon](https://github.com/KristanLaimon).

@@ -1,0 +1,16 @@
+{
+  "title": "Reference",
+  "pages": [
+    "ready-instance",
+    "pending-integrations",
+    "integration-api-version",
+    "document-surface-version",
+    "install-plugin-integration",
+    "surface",
+    "paint-document-surface",
+    "release-document-surface",
+    "on-annotation-opened",
+    "on-annotation-closed",
+    "annotate"
+  ]
+}

@@ -1,0 +1,37 @@
+---
+title: "Install"
+description: "Put Ink Away on your reader."
+---
+
+You need KOReader already installed on your reader. If you don't have it yet, start
+with [KOReader's own guide](https://github.com/koreader/koreader/wiki).
+
+## Steps
+
+1. **Download** `ink-away.koplugin-vX.Y.Z.zip` (X.Y.Z is the version number) from the [latest release](https://github.com/EmirErtorer/ink-away.koplugin/releases/latest), under Assets.
+2. **Unzip it** on your computer. You get a folder called `ink-away.koplugin`.
+3. **Connect your reader** to the computer with a USB cable.
+4. **Copy the `ink-away.koplugin` folder** into KOReader's `plugins` folder:
+
+   | Reader | Folder |
+   | --- | --- |
+   | Kindle | `koreader/plugins/` |
+   | Kobo | `.adds/koreader/plugins/` (`.adds` is hidden: turn on hidden files on your computer) |
+   | Android (Boox and others) | `koreader/plugins/` in the app's storage |
+
+5. **Eject the reader and restart KOReader.**
+
+To check it worked, open the top menu, **Tools** tab: you should see **Ink Away (drawing canvas)**.
+
+## Updating
+
+After the first install, Ink Away updates itself. Open its **Settings**, then
+**Updates**. See [Updates](/docs/devices/updates) for prereleases and the automatic check.
+
+To update by hand instead, repeat the steps above and replace the old folder.
+Your drawings and notebooks are kept elsewhere, so nothing is lost.
+
+## Removing it
+
+Delete the `ink-away.koplugin` folder from `plugins`. Your work stays in the
+`ink away` folder, inside KOReader's own folder, until you delete that too.

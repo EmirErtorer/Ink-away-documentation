@@ -1,9 +1,17 @@
 {
-  "title": "Plugin Integration",
+  "title": "Ink Away",
   "pages": [
-    "---Plugin Integration---",
     "index",
-    "integration",
-    "api"
+    "---Get started---",
+    "...start",
+    "---Use it---",
+    "draw",
+    "notebooks",
+    "books",
+    "share",
+    "---Your reader---",
+    "...devices",
+    "---Developers---",
+    "developers"
   ]
 }

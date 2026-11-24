@@ -4,8 +4,8 @@ import './global.css';
 
 
 export const metadata: Metadata = {
-  title: { default: 'Ink-away.koplugin', template: '%s | Ink-away.koplugin' },
-  description: 'Plugin integration guides and the public Ink Away extension API for KOReader.',
+  title: { default: 'Ink Away', template: '%s | Ink Away' },
+  description: 'The guide to Ink Away, the drawing, notes and book annotation plugin for KOReader.',
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
